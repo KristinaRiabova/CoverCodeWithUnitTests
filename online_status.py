@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 api_url = "https://sef.podkolzin.consulting/api/users/lastSeen?offset=0"
 
-# Commit Message: Add function for loading user data from the API
+
 
 def load_user_data(offset):
     try:
@@ -114,3 +114,29 @@ def format_last_seen(last_seen, language="uk"):
     else:
         return localizations["Long time ago"][language]
 
+
+
+def show_users():
+    offset = 0
+    user_set = set()
+    user_counter = 0
+    total_users = 217
+
+    while user_counter < total_users:
+        user_data = load_user_data(offset)
+        if not user_data:
+            break
+
+        for user in user_data["data"]:
+            user_id = user["userId"]
+
+            if user_id not in user_set:
+                last_seen_date = user.get("lastSeenDate")
+                formatted_last_seen = "Online" if user["isOnline"] else format_last_seen(last_seen_date)
+
+                user_name = user.get("nickname")
+
+                user_set.add(user_id)
+                user_counter += 1
+
+                print(f"User {user_counter}: {user_name} was|is online {formatted_last_seen}.")
