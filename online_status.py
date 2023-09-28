@@ -140,3 +140,6 @@ def show_users():
                 user_counter += 1
 
                 print(f"User {user_counter}: {user_name} was|is online {formatted_last_seen}.")
+
+if __name__ == "__main__":
+    show_users()
