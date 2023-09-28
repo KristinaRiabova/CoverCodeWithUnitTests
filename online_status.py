@@ -3,8 +3,6 @@ from datetime import datetime, timedelta
 
 api_url = "https://sef.podkolzin.consulting/api/users/lastSeen?offset=0"
 
-
-
 def load_user_data(offset):
     try:
         response = requests.get(api_url + str(offset))
@@ -17,6 +15,7 @@ def load_user_data(offset):
     except requests.exceptions.RequestException as e:
         print(f"API request failed: {e}")
         return None
+
 localizations = {
     "Just now": {
         "en": "Just now",
@@ -130,6 +129,7 @@ def show_users():
         for user in user_data["data"]:
             user_id = user["userId"]
 
+
             if user_id not in user_set:
                 last_seen_date = user.get("lastSeenDate")
                 formatted_last_seen = "Online" if user["isOnline"] else format_last_seen(last_seen_date)
@@ -141,5 +141,32 @@ def show_users():
 
                 print(f"User {user_counter}: {user_name} was|is online {formatted_last_seen}.")
 
+        offset += 1
+
+# Run the program
 if __name__ == "__main__":
     show_users()
+
+    formatted_message = format_last_seen("Just now", language="uk")
+    print(formatted_message)
+
+    formatted_message = format_last_seen("Less than a minute ago", language="uk")
+    print(formatted_message)
+
+    formatted_message = format_last_seen("Couple of minutes ago", language="uk")
+    print(formatted_message)
+
+    formatted_message = format_last_seen("An hour ago", language="uk")
+    print(formatted_message)
+
+    formatted_message = format_last_seen("Today", language="uk")
+    print(formatted_message)
+
+    formatted_message = format_last_seen("Yesterday", language="uk")
+    print(formatted_message)
+
+    formatted_message = format_last_seen("This week", language="uk")
+    print(formatted_message)
+
+    formatted_message = format_last_seen("Long time ago", language="uk")
+    print(formatted_message)
