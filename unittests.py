@@ -1,6 +1,9 @@
 import unittest
 from datetime import datetime, timedelta
 from online_status import format_last_seen
+from online_status import localize
+from unittest.mock import Mock, patch
+from online_status import load_user_data
 
 class TestFormatLastSeen(unittest.TestCase):
 
@@ -46,6 +49,50 @@ class TestFormatLastSeen(unittest.TestCase):
         now = datetime.now()
         last_seen = (now - timedelta(days=30)).replace(hour=10, minute=0, second=0, microsecond=0).isoformat()
         self.assertEqual(format_last_seen(last_seen, language="uk"), "Давно")
+
+class TestLocalize(unittest.TestCase):
+
+    def test_localize_uk(self):
+        translations = {
+            "Just now": "Щойно",
+            "Less than a minute ago": "Менше хвилини тому",
+            "Couple of minutes ago": "Пару хвилин тому",
+            "An hour ago": "Годину тому",
+            "Today": "Сьогодні",
+            "Yesterday": "Вчора",
+            "This week": "Цього тижня",
+            "Long time ago": "Давно",
+        }
+
+        for phrase, translation in translations.items():
+            with self.subTest(phrase=phrase):
+                self.assertEqual(localize(phrase, language="uk"), translation)
+
+class TestLoadUserData(unittest.TestCase):
+
+    @patch('online_status.requests.get')
+    def test_load_user_data_success(self, mock_get):
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"data": [{"userId": 1, "lastSeenDate": "2023-09-30T12:00:00Z"}]}
+        mock_get.return_value = mock_response
+
+        result = load_user_data(0)
+
+        self.assertIsNotNone(result)
+        self.assertEqual(len(result["data"]), 1)
+        self.assertEqual(result["data"][0]["userId"], 1)
+        self.assertEqual(result["data"][0]["lastSeenDate"], "2023-09-30T12:00:00Z")
+
+    @patch('online_status.requests.get')
+    def test_load_user_data_failure(self, mock_get):
+        mock_response = Mock()
+        mock_response.status_code = 404
+        mock_get.return_value = mock_response
+
+        result = load_user_data(0)
+
+        self.assertIsNone(result)
 
 if __name__ == "__main__":
     unittest.main()
